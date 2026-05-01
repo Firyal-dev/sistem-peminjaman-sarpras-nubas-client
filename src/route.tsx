@@ -8,6 +8,10 @@ import { DaftarBarang } from './features/admin/pages/barang/page'
 import { DaftarPeminjamanBarang } from './features/admin/pages/peminjaman/page'
 import { DaftarPengembalianBarang } from './features/admin/pages/pengembalian/page'
 
+import { Form } from './features/user/pages/form/page'
+import { Scanner } from './features/user/pages/scan/page'
+import { LandingPage } from './features/user/pages/landing-page/page'
+
 const route = createBrowserRouter([
     {
         path: '/admin/login',
@@ -34,6 +38,18 @@ const route = createBrowserRouter([
                 Component: DaftarPengembalianBarang
             }
         ]
+    },
+    {
+        path: '/form',
+        Component: Form
+    },
+    {
+        path: '/scan',
+        Component: Scanner
+    },
+    {
+        path: '/',
+        Component: LandingPage
     }
 ])
 
