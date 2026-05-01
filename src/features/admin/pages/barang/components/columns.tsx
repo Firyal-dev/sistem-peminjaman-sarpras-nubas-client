@@ -1,36 +1,31 @@
 import { type ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, QrCode } from "lucide-react"
+import { ArrowUpDown, QrCode, ImageIcon, CheckCircle2, XCircle } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/common/components/ui/button"
 import { Checkbox } from "@/common/components/ui/checkbox"
+import { Badge } from "@/common/components/ui/badge"
 import { DataTableDeleteAction, DataTableEditAction } from "@/features/admin/components/data-table-button-action"
 import { FormDialog } from "./form-dialog"
+import { ImagePhotoView } from "@/features/admin/components/photo-view"
 
 export interface Barang {
     id: number
     nama: string
+    is_available: boolean
+    photo?: string | null
 }
 
 export const dummyData: Barang[] = [
-    { id: 1, nama: "Proyektor Epson" },
-    { id: 2, nama: "Laptop Lenovo" },
-    { id: 3, nama: "Kursi Lipat" },
-    { id: 4, nama: "Meja Panjang" },
-    { id: 5, nama: "Microphone Wireless" },
-    { id: 6, nama: "Speaker Aktif" },
-    { id: 7, nama: "Kamera DSLR" },
-    { id: 8, nama: "Tripod Kamera" },
-    { id: 9, nama: "Layar Proyektor" },
-    { id: 10, nama: "Whiteboard" },
-    { id: 11, nama: "Spidol Whiteboard" },
-    { id: 12, nama: "Penghapus Whiteboard" },
+    { id: 1, nama: "Proyektor Epson", is_available: true,  photo: "https://placehold.co/100" },
+    { id: 2, nama: "Laptop Lenovo", is_available: false,  photo: null },
+    { id: 3, nama: "Kursi Lipat", is_available: true, photo: null },
+    { id: 4, nama: "Meja Panjang", is_available: true,  photo: null },
+    { id: 5, nama: "Microphone Wireless", is_available: false, photo: null },
 ]
 
-// Cell component for edit action — needs local state for dialog open
 const EditCell = ({ barang }: { barang: Barang }) => {
     const [open, setOpen] = useState(false)
-
     return (
         <>
             <DataTableEditAction onEdit={() => setOpen(true)} />
@@ -69,14 +64,22 @@ export const columns: ColumnDef<Barang>[] = [
             />
         ),
         enableSorting: false,
-        enableColumnFilter: false,
     },
     {
-        accessorKey: "id",
-        header: "No",
-        cell: ({ row }) => (
-            <div className="w-[40px] font-mono">{row.getValue("id")}</div>
-        ),
+        accessorKey: "photo",
+        header: "Foto",
+        cell: ({ row }) => {
+            const photo = row.original.photo
+            return (
+                <div className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted">
+                    {photo ? (
+                        <ImagePhotoView src={photo} alt="Barang" className="h-full w-full object-cover rounded-md" />
+                    ) : (
+                        <ImageIcon className="size-5 text-muted-foreground" />
+                    )}
+                </div>
+            )
+        },
     },
     {
         accessorKey: "nama",
@@ -88,26 +91,39 @@ export const columns: ColumnDef<Barang>[] = [
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
                 Nama Barang
-                <ArrowUpDown className="size-4" />
+                <ArrowUpDown className="size-4 ml-2" />
             </Button>
         ),
     },
     {
+        accessorKey: "is_available",
+        header: "Status",
+        cell: ({ row }) => {
+            const available = row.original.is_available
+            return (
+                <div className="flex items-center gap-2">
+                    {available ? (
+                        <CheckCircle2 className="size-4 text-green-500" />
+                    ) : (
+                        <XCircle className="size-4 text-destructive" />
+                    )}
+                    <span className="text-sm font-medium">
+                        {available ? "Tersedia" : "Dipinjam"}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
         id: "qr",
-        header: () => (
-            <Button size="sm" variant="outline">
-                <QrCode className="size-4" />
-                Generate Semua QR Code
-            </Button>
-        ),
+        header: "QR Code",
         cell: ({ row }) => (
             <Button
-                size="sm"
                 variant="outline"
                 onClick={() => console.log("Generate QR:", row.original)}
             >
+                Generate
                 <QrCode className="size-4" />
-                Generate QR Code
             </Button>
         ),
     },

@@ -9,7 +9,7 @@ import { DaftarPeminjamanBarang } from './features/admin/pages/peminjaman/page'
 import { DaftarPengembalianBarang } from './features/admin/pages/pengembalian/page'
 
 import { Form } from './features/user/pages/form/page'
-import { Scanner } from './features/user/pages/scan/page'
+import { ScanPage } from './features/user/pages/scan/page'
 import { LandingPage } from './features/user/pages/landing-page/page'
 
 const route = createBrowserRouter([
@@ -45,7 +45,7 @@ const route = createBrowserRouter([
     },
     {
         path: '/scan',
-        Component: Scanner
+        Component: ScanPage
     },
     {
         path: '/',

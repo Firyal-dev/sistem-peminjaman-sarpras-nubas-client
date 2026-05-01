@@ -3,6 +3,7 @@ import { Eye, EyeOff, Lock, User } from "lucide-react"
 
 import { Button } from "@/common/components/ui/button"
 import { Input } from "@/common/components/ui/input"
+import { Label } from "@/common/components/ui/label"
 
 export const LoginForm = () => {
     const [showPassword, setShowPassword] = useState(false)
@@ -36,9 +37,7 @@ export const LoginForm = () => {
 
             {/* Name */}
             <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">
-                    Nama
-                </label>
+                <Label htmlFor="name">Nama</Label>
                 <div className="relative">
                     <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -54,9 +53,7 @@ export const LoginForm = () => {
 
             {/* Password */}
             <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">
-                    Password
-                </label>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                     <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input

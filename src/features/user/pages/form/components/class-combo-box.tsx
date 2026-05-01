@@ -1,3 +1,4 @@
+import { Label } from "@/common/components/ui/label"
 import {
     Combobox,
     ComboboxContent,
@@ -20,7 +21,7 @@ interface ClassComboBoxProps {
 export const ClassComboBox = ({ items, onValueChange }: ClassComboBoxProps) => {
     return (
         <div className="space-y-2">
-            <label className="text-sm font-medium">Pilih Kelas</label>
+            <Label htmlFor="pilih-kelas">Pilih Kelas</Label>
             <Combobox
                 items={items}
                 itemToStringValue={(item) => item.label}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Plus } from "lucide-react"
 import { Button } from "@/common/components/ui/button"
 import {
     Dialog,
@@ -10,7 +11,7 @@ import {
     DialogTrigger,
 } from "@/common/components/ui/dialog"
 import { Input } from "@/common/components/ui/input"
-import { Plus } from "lucide-react"
+import { Label } from "@/common/components/ui/label"
 
 interface Barang {
     id: number
@@ -39,8 +40,8 @@ export const FormDialog = (props: FormDialogProps) => {
 
     const [open, setOpen] = useState(false)
     const [nama, setNama] = useState("")
+    const [photo, setPhoto] = useState("")
 
-    // Sync state when edit dialog opens
     useEffect(() => {
         if (isEdit && props.open) {
             setNama(props.defaultValues.nama)
@@ -92,17 +93,22 @@ export const FormDialog = (props: FormDialogProps) => {
                 </DialogHeader>
                 <div className="space-y-4 py-2">
                     <div className="space-y-2">
-                        <label
-                            htmlFor="nama-barang"
-                            className="text-sm font-medium leading-none"
-                        >
-                            Nama Barang
-                        </label>
+                        <Label htmlFor="nama-barang">Nama Barang</Label>
                         <Input
                             id="nama-barang"
                             placeholder="Contoh: Proyektor Epson"
                             value={nama}
                             onChange={(e) => setNama(e.target.value)}
+                            required
+                        />
+                        <Label htmlFor="foto-barang">Foto Barang</Label>
+                        <Input
+                            id="foto-barang"
+                            placeholder="Masukkan foto barang"
+                            value={photo}
+                            onChange={(e) => setPhoto(e.target.value)}
+                            type="file"
+                            accept="image/png, image/jpg, image/jpeg"
                         />
                     </div>
                 </div>
