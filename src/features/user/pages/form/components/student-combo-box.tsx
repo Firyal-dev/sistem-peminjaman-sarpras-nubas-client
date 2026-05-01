@@ -17,13 +17,14 @@ export interface StudentItem {
 interface StudentComboBoxProps {
     items: StudentItem[]
     disabled?: boolean
+    placeholder?: string
     onValueChange: (val: StudentItem | null) => void
 }
 
-export const StudentComboBox = ({ items, disabled, onValueChange }: StudentComboBoxProps) => {
+export const StudentComboBox = ({ items, disabled, placeholder, onValueChange }: StudentComboBoxProps) => {
     return (
         <div className="space-y-2">
-            <Label htmlFor="pilih-siswa">Pilih Siswa</Label>
+            <Label>Nama Siswa</Label>
             <Combobox
                 items={items}
                 itemToStringValue={(item) => item.label}
@@ -31,7 +32,7 @@ export const StudentComboBox = ({ items, disabled, onValueChange }: StudentCombo
                 disabled={disabled}
             >
                 <ComboboxInput
-                    placeholder={disabled ? "Pilih kelas dulu..." : "Cari nama siswa..."}
+                    placeholder={placeholder ?? (disabled ? "Pilih kelas dulu..." : "Cari nama siswa...")}
                 />
                 <ComboboxContent>
                     <ComboboxEmpty>Siswa tidak ditemukan.</ComboboxEmpty>

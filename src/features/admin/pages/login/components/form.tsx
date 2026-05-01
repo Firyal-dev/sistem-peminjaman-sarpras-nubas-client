@@ -1,30 +1,42 @@
 import { useState } from "react"
-import { Eye, EyeOff, Lock, User } from "lucide-react"
+import { useNavigate } from "react-router"
+import { Eye, EyeOff, Lock, Mail } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/common/components/ui/button"
 import { Input } from "@/common/components/ui/input"
 import { Label } from "@/common/components/ui/label"
+import { authService } from "@/common/api/services"
+import { authStore } from "@/common/auth/authStore"
 
 export const LoginForm = () => {
+    const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false)
-    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState<string | null>(null)
+    const [loading, setLoading] = useState(false)
 
-    const handleSubmit = (e: React.SubmitEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
 
-        if (!name.trim()) {
-            setError("Nama tidak boleh kosong.")
-            return
-        }
-        if (password.length < 8) {
-            setError("Password minimal 8 karakter.")
-            return
-        }
+        if (!email.trim()) { setError("Email tidak boleh kosong."); return }
+        if (password.length < 6) { setError("Password minimal 6 karakter."); return }
 
-        console.log("Login:", { name, password })
+        setLoading(true)
+        try {
+            const { token, user } = await authService.login(email, password)
+            authStore.save(token, user)
+            toast.success(`Selamat datang, ${user.name}!`)
+            navigate('/admin/dashboard', { replace: true })
+        } catch (e: unknown) {
+            const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
+            setError(msg ?? 'Login gagal. Periksa email dan password.')
+            toast.error(msg ?? 'Login gagal.')
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -35,18 +47,19 @@ export const LoginForm = () => {
                 </p>
             )}
 
-            {/* Name */}
+            {/* Email */}
             <div className="space-y-2">
-                <Label htmlFor="name">Nama</Label>
+                <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                    <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        id="name"
-                        type="text"
-                        placeholder="Masukkan nama"
+                        id="email"
+                        type="email"
+                        placeholder="admin@example.com"
                         className="pl-9"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        autoComplete="email"
                     />
                 </div>
             </div>
@@ -59,14 +72,15 @@ export const LoginForm = () => {
                     <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Min. 8 karakter"
+                        placeholder="Password"
                         className="pl-9 pr-10"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        autoComplete="current-password"
                     />
                     <button
                         type="button"
-                        onClick={() => setShowPassword((prev) => !prev)}
+                        onClick={() => setShowPassword(p => !p)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
                     >
@@ -75,8 +89,8 @@ export const LoginForm = () => {
                 </div>
             </div>
 
-            <Button type="submit" className="w-full">
-                Masuk
+            <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Memuat..." : "Masuk"}
             </Button>
         </form>
     )

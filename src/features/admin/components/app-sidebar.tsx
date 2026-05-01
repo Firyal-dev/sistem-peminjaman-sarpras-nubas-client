@@ -39,6 +39,14 @@ const navItems = [
 export const AppSidebar = () => {
     const location = useLocation()
 
+    // Aktif juga untuk sub-route (misal /admin/barang/:id/units)
+    const isActive = (url: string) => {
+        if (url === '/admin/barang') {
+            return location.pathname === url || location.pathname.startsWith('/admin/barang/')
+        }
+        return location.pathname === url
+    }
+
     return (
         <Sidebar>
             <SidebarHeader className="px-4 py-4">
@@ -53,7 +61,7 @@ export const AppSidebar = () => {
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton
                                         asChild
-                                        isActive={location.pathname === item.url}
+                                        isActive={isActive(item.url)}
                                         tooltip={item.title}
                                     >
                                         <NavLink to={item.url}>

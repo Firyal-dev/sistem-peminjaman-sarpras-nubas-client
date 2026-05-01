@@ -2,24 +2,36 @@ import { X } from "lucide-react"
 import { Button } from "@/common/components/ui/button"
 
 interface ScannedListProps {
+    mode?: "borrow" | "return"
     items: string[]
+    itemLabels?: Record<string, string>
     onRemove: (code: string) => void
     onSubmit: () => void
+    submitting?: boolean
+    submitLabel?: string
 }
 
-export const ScannedList = ({ items, onRemove, onSubmit }: ScannedListProps) => {
+export const ScannedList = ({
+    mode = "borrow",
+    items,
+    itemLabels,
+    onRemove,
+    onSubmit,
+    submitting,
+    submitLabel,
+}: ScannedListProps) => {
     if (items.length === 0) return null
+
+    const label = submitLabel ?? (mode === "return" ? "Kembalikan" : "Pinjam")
 
     return (
         <div className="space-y-3">
-            <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">
-                    Barang dipilih
-                    <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                        {items.length}
-                    </span>
-                </p>
-            </div>
+            <p className="text-sm font-medium">
+                {mode === "return" ? "Barang dikembalikan" : "Barang dipilih"}
+                <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                    {items.length}
+                </span>
+            </p>
 
             <div className="space-y-2">
                 {items.map((code, index) => (
@@ -31,13 +43,20 @@ export const ScannedList = ({ items, onRemove, onSubmit }: ScannedListProps) => 
                             <span className="flex size-6 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
                                 {index + 1}
                             </span>
-                            <span className="text-sm font-mono">{code}</span>
+                            {/* Tampilkan nama item saja — sembunyikan QR code dari user */}
+                            <span className="text-sm font-medium">
+                                {itemLabels?.[code] && itemLabels[code] !== code
+                                    ? itemLabels[code]
+                                    : code
+                                }
+                            </span>
                         </div>
                         <Button
                             variant="ghost"
                             size="icon"
                             className="size-7 text-muted-foreground hover:text-destructive"
                             onClick={() => onRemove(code)}
+                            disabled={submitting}
                         >
                             <X className="size-4" />
                         </Button>
@@ -45,8 +64,8 @@ export const ScannedList = ({ items, onRemove, onSubmit }: ScannedListProps) => 
                 ))}
             </div>
 
-            <Button className="w-full" onClick={onSubmit}>
-                Pinjam {items.length} Barang
+            <Button className="w-full" onClick={onSubmit} disabled={submitting}>
+                {submitting ? "Memproses..." : `${label} ${items.length} Barang`}
             </Button>
         </div>
     )

@@ -1,35 +1,12 @@
 import { type ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, RotateCcw } from "lucide-react"
+import { useNavigate } from "react-router"
 
 import { Button } from "@/common/components/ui/button"
 import { Checkbox } from "@/common/components/ui/checkbox"
-import { DataTableDeleteAction } from "@/features/admin/components/data-table-button-action"
+import type { ApiTransaction } from "@/common/api/services"
 
-type Kelas =
-    | "X AK" | "XI AK" | "XII AK"
-    | "X FARMASI" | "XI FARMASI" | "XII FARMASI"
-    | "X PPLG" | "XI PPLG" | "XII PPLG"
-
-export interface Peminjaman {
-    id: number
-    namaPeminjam: string
-    kelas: Kelas
-    namaBarang: string
-    waktuPeminjaman: string
-}
-
-export const dummyData: Peminjaman[] = [
-    { id: 1, namaPeminjam: "Andi Saputra", kelas: "X AK", namaBarang: "Proyektor Epson", waktuPeminjaman: "2025-04-28 08:00" },
-    { id: 2, namaPeminjam: "Budi Santoso", kelas: "XI PPLG", namaBarang: "Laptop Lenovo", waktuPeminjaman: "2025-04-28 09:15" },
-    { id: 3, namaPeminjam: "Citra Dewi", kelas: "XII FARMASI", namaBarang: "Microphone Wireless", waktuPeminjaman: "2025-04-28 10:30" },
-    { id: 4, namaPeminjam: "Dian Pratama", kelas: "X PPLG", namaBarang: "Speaker Aktif", waktuPeminjaman: "2025-04-29 07:45" },
-    { id: 5, namaPeminjam: "Eka Rahayu", kelas: "XI AK", namaBarang: "Kamera DSLR", waktuPeminjaman: "2025-04-29 08:00" },
-    { id: 6, namaPeminjam: "Fajar Nugroho", kelas: "XII AK", namaBarang: "Tripod Kamera", waktuPeminjaman: "2025-04-29 11:00" },
-    { id: 7, namaPeminjam: "Gita Lestari", kelas: "X FARMASI", namaBarang: "Layar Proyektor", waktuPeminjaman: "2025-04-30 08:30" },
-    { id: 8, namaPeminjam: "Hendra Wijaya", kelas: "XI FARMASI", namaBarang: "Whiteboard", waktuPeminjaman: "2025-04-30 09:00" },
-    { id: 9, namaPeminjam: "Indah Permata", kelas: "XII PPLG", namaBarang: "Kursi Lipat", waktuPeminjaman: "2025-04-30 13:00" },
-    { id: 10, namaPeminjam: "Joko Susilo", kelas: "X AK", namaBarang: "Meja Panjang", waktuPeminjaman: "2025-05-01 07:30" },
-]
+export type { ApiTransaction as Peminjaman }
 
 const formatWaktu = (waktu: string) => {
     const date = new Date(waktu)
@@ -42,7 +19,27 @@ const formatWaktu = (waktu: string) => {
     })
 }
 
-export const columns: ColumnDef<Peminjaman>[] = [
+const ReturnButton = ({ tx }: { tx: ApiTransaction }) => {
+    const navigate = useNavigate()
+    return (
+        <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate('/scan', {
+                state: {
+                    mode: 'return',
+                    transaction_id: tx.id,
+                    student_name: tx.student?.name ?? `Transaksi #${tx.id}`,
+                }
+            })}
+        >
+            <RotateCcw className="size-4 mr-1" />
+            Kembalikan
+        </Button>
+    )
+}
+
+export const columns: ColumnDef<ApiTransaction>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -76,7 +73,7 @@ export const columns: ColumnDef<Peminjaman>[] = [
         ),
     },
     {
-        accessorKey: "namaPeminjam",
+        id: "namaPeminjam",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -88,23 +85,26 @@ export const columns: ColumnDef<Peminjaman>[] = [
                 <ArrowUpDown className="size-4" />
             </Button>
         ),
+        accessorFn: (row) => row.student?.name ?? '-',
     },
     {
-        accessorKey: "namaBarang",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                size="sm"
-                className="-ml-3"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Nama Barang
-                <ArrowUpDown className="size-4" />
-            </Button>
-        ),
+        id: "namaBarang",
+        header: "Barang Dipinjam",
+        cell: ({ row }) => {
+            const details = row.original.details ?? []
+            const names = details.map(d => d.unit?.item?.name ?? '-')
+            return (
+                <div className="space-y-0.5">
+                    {names.length > 0
+                        ? names.map((n, i) => <div key={i} className="text-sm">{n}</div>)
+                        : <span className="text-muted-foreground">-</span>
+                    }
+                </div>
+            )
+        },
     },
     {
-        accessorKey: "kelas",
+        id: "kelas",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -116,9 +116,13 @@ export const columns: ColumnDef<Peminjaman>[] = [
                 <ArrowUpDown className="size-4" />
             </Button>
         ),
+        accessorFn: (row) => {
+            const c = row.student?.class
+            return c ? `${c.class} ${c.major}` : '-'
+        },
     },
     {
-        accessorKey: "waktuPeminjaman",
+        accessorKey: "borrow_time",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -130,16 +134,16 @@ export const columns: ColumnDef<Peminjaman>[] = [
                 <ArrowUpDown className="size-4" />
             </Button>
         ),
-        cell: ({ row }) => formatWaktu(row.getValue("waktuPeminjaman")),
+        cell: ({ row }) => formatWaktu(row.getValue("borrow_time")),
+    },
+    {
+        accessorKey: "due_time",
+        header: "Batas Waktu",
+        cell: ({ row }) => formatWaktu(row.getValue("due_time")),
     },
     {
         id: "actions",
         header: "Aksi",
-        cell: ({ row }) => (
-            <DataTableDeleteAction
-                id={row.original.id}
-                onDelete={(id) => console.log("Delete:", id)}
-            />
-        ),
+        cell: ({ row }) => <ReturnButton tx={row.original} />,
     },
 ]

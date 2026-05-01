@@ -16,9 +16,10 @@ export interface ClassItem {
 interface ClassComboBoxProps {
     items: ClassItem[]
     onValueChange: (val: ClassItem | null) => void
+    disabled?: boolean
 }
 
-export const ClassComboBox = ({ items, onValueChange }: ClassComboBoxProps) => {
+export const ClassComboBox = ({ items, onValueChange, disabled }: ClassComboBoxProps) => {
     return (
         <div className="space-y-2">
             <Label htmlFor="pilih-kelas">Pilih Kelas</Label>
@@ -26,6 +27,7 @@ export const ClassComboBox = ({ items, onValueChange }: ClassComboBoxProps) => {
                 items={items}
                 itemToStringValue={(item) => item.label}
                 onValueChange={onValueChange}
+                disabled={disabled}
             >
                 <ComboboxInput placeholder="Pilih kelas..." />
                 <ComboboxContent>

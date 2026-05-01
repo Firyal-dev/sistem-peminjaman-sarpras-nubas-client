@@ -1,39 +1,103 @@
 import { useState, useMemo } from "react"
-import { Link } from "react-router"
+import { useNavigate } from "react-router"
 import { ArrowRight, ClipboardList } from "lucide-react"
 
 import { Button } from "@/common/components/ui/button"
 import { Card, CardContent } from "@/common/components/ui/card"
+import { Label } from "@/common/components/ui/label"
 import { UserHeader } from "../../components/header"
-import { ClassComboBox, type ClassItem } from "./components/class-combo-box"
 import { StudentComboBox, type StudentItem } from "./components/student-combo-box"
+import { useClasses } from "@/common/hooks/useClasses"
+import { useStudents } from "@/common/hooks/useStudents"
+import {
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from "@/common/components/ui/combobox"
 
-const classes: ClassItem[] = [
-    { label: "10 PPLG", value: "1" },
-    { label: "10 AK", value: "2" },
-    { label: "11 PPLG", value: "3" },
-]
+interface SimpleItem {
+    label: string
+    value: string
+}
 
-const allStudents: StudentItem[] = [
-    { label: "Firyal Muhammad Azka", value: "s1", class_id: "1" },
-    { label: "Rizky Ramadhan", value: "s2", class_id: "1" },
-    { label: "Budi Saputra", value: "s3", class_id: "2" },
-    { label: "Siti Aminah", value: "s4", class_id: "2" },
-    { label: "Andika Pratama", value: "s5", class_id: "3" },
-]
+/**
+ * Ambil angkatan (angka di awal nama kelas).
+ * "10 PPLG 1" → 10, "13 AK 2" → 13
+ */
+function getAngkatan(className: string): number {
+    const match = className.match(/^(\d+)/)
+    return match ? parseInt(match[1], 10) : 0
+}
 
 export function Form() {
-    const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null)
+    const navigate = useNavigate()
+
+    const [selectedMajor, setSelectedMajor] = useState<SimpleItem | null>(null)
+    const [selectedClass, setSelectedClass] = useState<SimpleItem | null>(null)
     const [selectedStudent, setSelectedStudent] = useState<StudentItem | null>(null)
 
-    const filteredStudents = useMemo(() => {
-        if (!selectedClass) return []
-        return allStudents.filter((s) => s.class_id === selectedClass.value)
-    }, [selectedClass])
+    const { data: classesData, loading: classesLoading } = useClasses()
+    const { data: studentsData, loading: studentsLoading } = useStudents(
+        selectedClass ? Number(selectedClass.value) : undefined
+    )
 
-    const handleClassChange = (val: ClassItem | null) => {
+    // Unique jurusan, urut alfabetis
+    const majors: SimpleItem[] = useMemo(() => {
+        const seen = new Set<string>()
+        const result: SimpleItem[] = []
+        for (const c of classesData) {
+            if (!seen.has(c.major)) {
+                seen.add(c.major)
+                result.push({ label: c.major, value: c.major })
+            }
+        }
+        return result.sort((a, b) => a.label.localeCompare(b.label))
+    }, [classesData])
+
+    // Kelas sesuai jurusan, diurutkan by angkatan (10 → 11 → 12 → 13)
+    const filteredClasses: SimpleItem[] = useMemo(() => {
+        if (!selectedMajor) return []
+        return classesData
+            .filter(c => c.major === selectedMajor.value)
+            .sort((a, b) => {
+                const angkatanDiff = getAngkatan(a.class) - getAngkatan(b.class)
+                if (angkatanDiff !== 0) return angkatanDiff
+                return a.class.localeCompare(b.class)
+            })
+            .map(c => ({ label: c.class, value: String(c.id) }))
+    }, [classesData, selectedMajor])
+
+    const students: StudentItem[] = useMemo(() =>
+        studentsData.map(s => ({
+            label: s.name,
+            value: String(s.id),
+            class_id: String(s.class_id),
+        })),
+        [studentsData]
+    )
+
+    const handleMajorChange = (val: SimpleItem | null) => {
+        setSelectedMajor(val)
+        setSelectedClass(null)
+        setSelectedStudent(null)
+    }
+
+    const handleClassChange = (val: SimpleItem | null) => {
         setSelectedClass(val)
         setSelectedStudent(null)
+    }
+
+    const handleLanjut = () => {
+        if (!selectedStudent) return
+        navigate('/scan', {
+            state: {
+                student_id: Number(selectedStudent.value),
+                student_name: selectedStudent.label,
+            }
+        })
     }
 
     return (
@@ -43,31 +107,93 @@ export function Form() {
                 <UserHeader
                     icon={ClipboardList}
                     title="Form Peminjaman"
-                    desc="Pilih kelas dan nama siswa untuk melanjutkan"
+                    desc="Pilih jurusan, kelas, dan nama siswa"
                 />
 
-                {/* Form card */}
                 <Card>
                     <CardContent className="space-y-4 pt-6">
-                        <ClassComboBox items={classes} onValueChange={handleClassChange} />
+
+                        {/* Step 1 — Jurusan */}
+                        <div className="space-y-2">
+                            <Label>Jurusan</Label>
+                            <Combobox
+                                items={majors}
+                                itemToStringValue={(item) => item.label}
+                                onValueChange={handleMajorChange}
+                                disabled={classesLoading}
+                            >
+                                <ComboboxInput
+                                    placeholder={classesLoading ? "Memuat..." : "Pilih jurusan..."}
+                                />
+                                <ComboboxContent>
+                                    <ComboboxEmpty>Jurusan tidak ditemukan.</ComboboxEmpty>
+                                    <ComboboxList>
+                                        {(item) => (
+                                            <ComboboxItem key={item.value} value={item}>
+                                                {item.label}
+                                            </ComboboxItem>
+                                        )}
+                                    </ComboboxList>
+                                </ComboboxContent>
+                            </Combobox>
+                        </div>
+
+                        {/* Step 2 — Kelas (hanya muncul setelah jurusan dipilih) */}
+                        <div className="space-y-2">
+                            <Label className={!selectedMajor ? "text-muted-foreground" : ""}>
+                                Kelas
+                            </Label>
+                            <Combobox
+                                key={selectedMajor?.value ?? "no-major"}
+                                items={filteredClasses}
+                                itemToStringValue={(item) => item.label}
+                                onValueChange={handleClassChange}
+                                disabled={!selectedMajor}
+                            >
+                                <ComboboxInput
+                                    placeholder={
+                                        !selectedMajor
+                                            ? "Pilih jurusan dulu..."
+                                            : `Pilih kelas ${selectedMajor.label}...`
+                                    }
+                                />
+                                <ComboboxContent>
+                                    <ComboboxEmpty>Kelas tidak ditemukan.</ComboboxEmpty>
+                                    <ComboboxList>
+                                        {(item) => (
+                                            <ComboboxItem key={item.value} value={item}>
+                                                {item.label}
+                                            </ComboboxItem>
+                                        )}
+                                    </ComboboxList>
+                                </ComboboxContent>
+                            </Combobox>
+                        </div>
+
+                        {/* Step 3 — Siswa (hanya aktif setelah kelas dipilih) */}
                         <StudentComboBox
-                            key={selectedClass?.value ?? "empty"}
-                            items={filteredStudents}
-                            disabled={!selectedClass}
+                            key={selectedClass?.value ?? "no-class"}
+                            items={students}
+                            disabled={!selectedClass || studentsLoading}
                             onValueChange={setSelectedStudent}
+                            placeholder={
+                                !selectedClass
+                                    ? "Pilih kelas dulu..."
+                                    : studentsLoading
+                                        ? "Memuat siswa..."
+                                        : "Cari nama siswa..."
+                            }
                         />
+
                     </CardContent>
                 </Card>
 
-                {/* CTA */}
-                {selectedStudent &&
-                    <Button asChild className="w-full" disabled={!selectedStudent}>
-                        <Link to="/scan">
-                            Lanjut Scan Barcode
-                            <ArrowRight className="size-4" />
-                        </Link>
+                {selectedStudent && (
+                    <Button className="w-full" onClick={handleLanjut}>
+                        Lanjut Scan Barcode
+                        <ArrowRight className="size-4" />
                     </Button>
-                }
+                )}
 
                 <p className="text-center text-xs text-muted-foreground">
                     Pastikan data yang dipilih sudah benar sebelum melanjutkan

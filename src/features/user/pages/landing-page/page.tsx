@@ -34,7 +34,7 @@ export const LandingPage = () => {
                         </Link>
                     </Button>
                     <Button asChild size="lg" variant="outline" className="w-full">
-                        <Link to="/scan">
+                        <Link to="/return">
                             <RotateCcw className="size-4" />
                             Kembalikan Barang
                         </Link>

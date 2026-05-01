@@ -1,5 +1,2 @@
-import { FormDialog } from "./components/form-dialog"
-
-export const BarangForm = () => {
-    return <FormDialog />
-}
+// Re-exported from page.tsx — kept for backward compat if needed
+export { } from "./components/form-dialog"

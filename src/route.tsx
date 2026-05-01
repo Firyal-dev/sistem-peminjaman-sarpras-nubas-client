@@ -1,5 +1,8 @@
-import { createBrowserRouter, RouterProvider } from 'react-router'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router'
 import { TooltipProvider } from './common/components/ui/tooltip'
+
+import { RequireAuth } from './common/auth/RequireAuth'
+import { authStore } from './common/auth/authStore'
 
 import { Layout } from './features/admin/layout'
 import { Login } from './features/admin/pages/login/page'
@@ -7,50 +10,78 @@ import { Dashboard } from './features/admin/pages/dashboard/page'
 import { DaftarBarang } from './features/admin/pages/barang/page'
 import { DaftarPeminjamanBarang } from './features/admin/pages/peminjaman/page'
 import { DaftarPengembalianBarang } from './features/admin/pages/pengembalian/page'
+import { UnitPage } from './features/admin/pages/units/page'
 
 import { Form } from './features/user/pages/form/page'
 import { ScanPage } from './features/user/pages/scan/page'
 import { LandingPage } from './features/user/pages/landing-page/page'
+import { ReturnPage } from './features/user/pages/return/page'
+
+// Redirect ke dashboard kalau sudah login
+const LoginGuard = () =>
+    authStore.isLoggedIn() ? <Navigate to="/admin/dashboard" replace /> : <Login />
 
 const route = createBrowserRouter([
+    // Login — redirect ke dashboard kalau sudah login
     {
         path: '/admin/login',
-        Component: Login
+        Component: LoginGuard,
     },
+
+    // Admin — semua route di sini butuh auth
     {
         path: '/admin',
-        Component: Layout,
+        Component: RequireAuth,
         children: [
             {
-                path: '/admin/dashboard',
-                Component: Dashboard
+                Component: Layout,
+                children: [
+                    {
+                        index: true,
+                        element: <Navigate to="/admin/dashboard" replace />,
+                    },
+                    {
+                        path: 'dashboard',
+                        Component: Dashboard,
+                    },
+                    {
+                        path: 'barang',
+                        Component: DaftarBarang,
+                    },
+                    {
+                        path: 'barang/:itemId/units',
+                        Component: UnitPage,
+                    },
+                    {
+                        path: 'dipinjam',
+                        Component: DaftarPeminjamanBarang,
+                    },
+                    {
+                        path: 'dikembalikan',
+                        Component: DaftarPengembalianBarang,
+                    },
+                ],
             },
-            {
-                path: '/admin/barang',
-                Component: DaftarBarang
-            },
-            {
-                path: '/admin/dipinjam',
-                Component: DaftarPeminjamanBarang
-            },
-            {
-                path: '/admin/dikembalikan',
-                Component: DaftarPengembalianBarang
-            }
-        ]
+        ],
     },
+
+    // User routes — tidak butuh auth
     {
         path: '/form',
-        Component: Form
+        Component: Form,
+    },
+    {
+        path: '/return',
+        Component: ReturnPage,
     },
     {
         path: '/scan',
-        Component: ScanPage
+        Component: ScanPage,
     },
     {
         path: '/',
-        Component: LandingPage
-    }
+        Component: LandingPage,
+    },
 ])
 
 export const Router = () => {

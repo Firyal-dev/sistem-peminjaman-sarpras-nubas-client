@@ -3,36 +3,12 @@ import { ArrowUpDown } from "lucide-react"
 
 import { Button } from "@/common/components/ui/button"
 import { Checkbox } from "@/common/components/ui/checkbox"
-import { DataTableDeleteAction } from "@/features/admin/components/data-table-button-action"
+import type { ApiTransaction } from "@/common/api/services"
 
-type Kelas =
-    | "X AK" | "XI AK" | "XII AK"
-    | "X FARMASI" | "XI FARMASI" | "XII FARMASI"
-    | "X PPLG" | "XI PPLG" | "XII PPLG"
+export type { ApiTransaction as Pengembalian }
 
-export interface Pengembalian {
-    id: number
-    namaPeminjam: string
-    namaBarang: string
-    kelas: Kelas
-    waktuPeminjaman: string
-    waktuPengembalian: string
-}
-
-export const dummyData: Pengembalian[] = [
-    { id: 1, namaPeminjam: "Andi Saputra", namaBarang: "Proyektor Epson", kelas: "X AK", waktuPeminjaman: "2025-04-21 08:00", waktuPengembalian: "2025-04-28 08:00" },
-    { id: 2, namaPeminjam: "Budi Santoso", namaBarang: "Laptop Lenovo", kelas: "XI PPLG", waktuPeminjaman: "2025-04-21 09:15", waktuPengembalian: "2025-04-28 09:00" },
-    { id: 3, namaPeminjam: "Citra Dewi", namaBarang: "Microphone Wireless", kelas: "XII FARMASI", waktuPeminjaman: "2025-04-22 10:30", waktuPengembalian: "2025-04-29 10:00" },
-    { id: 4, namaPeminjam: "Dian Pratama", namaBarang: "Speaker Aktif", kelas: "X PPLG", waktuPeminjaman: "2025-04-22 07:45", waktuPengembalian: "2025-04-29 08:00" },
-    { id: 5, namaPeminjam: "Eka Rahayu", namaBarang: "Kamera DSLR", kelas: "XI AK", waktuPeminjaman: "2025-04-23 08:00", waktuPengembalian: "2025-04-30 08:00" },
-    { id: 6, namaPeminjam: "Fajar Nugroho", namaBarang: "Tripod Kamera", kelas: "XII AK", waktuPeminjaman: "2025-04-23 11:00", waktuPengembalian: "2025-04-30 11:00" },
-    { id: 7, namaPeminjam: "Gita Lestari", namaBarang: "Layar Proyektor", kelas: "X FARMASI", waktuPeminjaman: "2025-04-24 08:30", waktuPengembalian: "2025-05-01 08:00" },
-    { id: 8, namaPeminjam: "Hendra Wijaya", namaBarang: "Whiteboard", kelas: "XI FARMASI", waktuPeminjaman: "2025-04-24 09:00", waktuPengembalian: "2025-05-01 09:00" },
-    { id: 9, namaPeminjam: "Indah Permata", namaBarang: "Kursi Lipat", kelas: "XII PPLG", waktuPeminjaman: "2025-04-25 13:00", waktuPengembalian: "2025-05-01 13:00" },
-    { id: 10, namaPeminjam: "Joko Susilo", namaBarang: "Meja Panjang", kelas: "X AK", waktuPeminjaman: "2025-04-25 07:30", waktuPengembalian: "2025-05-01 07:30" },
-]
-
-const formatWaktu = (waktu: string) => {
+const formatWaktu = (waktu: string | null) => {
+    if (!waktu) return '-'
     const date = new Date(waktu)
     return date.toLocaleString("id-ID", {
         day: "2-digit",
@@ -43,7 +19,7 @@ const formatWaktu = (waktu: string) => {
     })
 }
 
-export const columns: ColumnDef<Pengembalian>[] = [
+export const columns: ColumnDef<ApiTransaction>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -77,7 +53,7 @@ export const columns: ColumnDef<Pengembalian>[] = [
         ),
     },
     {
-        accessorKey: "namaPeminjam",
+        id: "namaPeminjam",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -89,23 +65,26 @@ export const columns: ColumnDef<Pengembalian>[] = [
                 <ArrowUpDown className="size-4" />
             </Button>
         ),
+        accessorFn: (row) => row.student?.name ?? '-',
     },
     {
-        accessorKey: "namaBarang",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                size="sm"
-                className="-ml-3"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Nama Barang
-                <ArrowUpDown className="size-4" />
-            </Button>
-        ),
+        id: "namaBarang",
+        header: "Barang",
+        cell: ({ row }) => {
+            const details = row.original.details ?? []
+            const names = details.map(d => d.unit?.item?.name ?? '-')
+            return (
+                <div className="space-y-0.5">
+                    {names.length > 0
+                        ? names.map((n, i) => <div key={i} className="text-sm">{n}</div>)
+                        : <span className="text-muted-foreground">-</span>
+                    }
+                </div>
+            )
+        },
     },
     {
-        accessorKey: "kelas",
+        id: "kelas",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -117,9 +96,13 @@ export const columns: ColumnDef<Pengembalian>[] = [
                 <ArrowUpDown className="size-4" />
             </Button>
         ),
+        accessorFn: (row) => {
+            const c = row.student?.class
+            return c ? `${c.class} ${c.major}` : '-'
+        },
     },
     {
-        accessorKey: "waktuPeminjaman",
+        accessorKey: "borrow_time",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -131,10 +114,10 @@ export const columns: ColumnDef<Pengembalian>[] = [
                 <ArrowUpDown className="size-4" />
             </Button>
         ),
-        cell: ({ row }) => formatWaktu(row.getValue("waktuPeminjaman")),
+        cell: ({ row }) => formatWaktu(row.getValue("borrow_time")),
     },
     {
-        accessorKey: "waktuPengembalian",
+        accessorKey: "return_time",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -146,16 +129,6 @@ export const columns: ColumnDef<Pengembalian>[] = [
                 <ArrowUpDown className="size-4" />
             </Button>
         ),
-        cell: ({ row }) => formatWaktu(row.getValue("waktuPengembalian")),
-    },
-    {
-        id: "actions",
-        header: "Aksi",
-        cell: ({ row }) => (
-            <DataTableDeleteAction
-                id={row.original.id}
-                onDelete={(id) => console.log("Delete:", id)}
-            />
-        ),
+        cell: ({ row }) => formatWaktu(row.getValue("return_time")),
     },
 ]

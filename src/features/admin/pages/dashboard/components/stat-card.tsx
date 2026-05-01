@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/common/components/ui/card"
 
 interface StatCardProps {
     title: string
-    value: number
+    value: number | string
     icon: LucideIcon
     desc: string
 }
