@@ -94,10 +94,7 @@ export const columns: ColumnDef<ApiTransaction>[] = [
     {
         id: "kelas",
         header: "Kelas",
-        accessorFn: (row) => {
-            const c = row.student?.class
-            return c ? `${c.class} ${c.major}` : '-'
-        },
+        accessorFn: (row) => row.student?.class?.full_name ?? '-',
     },
     {
         id: "waktu_pinjam_kembali",

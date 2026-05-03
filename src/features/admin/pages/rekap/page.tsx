@@ -48,9 +48,7 @@ export const RekapPage = () => {
             const q = search.toLowerCase()
             const nama = tx.student?.name?.toLowerCase() ?? ''
             const nis = tx.student?.nis?.toLowerCase() ?? ''
-            const kelas = tx.student?.class
-                ? `${tx.student.class.class} ${tx.student.class.major}`.toLowerCase()
-                : ''
+            const kelas = tx.student?.class?.full_name?.toLowerCase() ?? ''
             const barang = (tx.details ?? [])
                 .map(d => d.unit?.item?.name?.toLowerCase() ?? '')
                 .join(' ')
@@ -215,9 +213,7 @@ export const RekapPage = () => {
                                             <td className="px-4 py-3">
                                                 <p className="font-medium">{tx.student?.name ?? '-'}</p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    {tx.student?.class
-                                                        ? `${tx.student.class.class} ${tx.student.class.major}`
-                                                        : '-'}
+                                                    {tx.student?.class?.full_name ?? '-'}
                                                 </p>
                                             </td>
 

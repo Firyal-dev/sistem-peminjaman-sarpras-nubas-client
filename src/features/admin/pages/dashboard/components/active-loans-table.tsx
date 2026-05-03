@@ -59,9 +59,7 @@ export const ActiveLoansTable = () => {
                 <tbody>
                     {sorted.slice(0, 8).map(loan => {
                         const terlambat = isTerlambatAktif(loan.due_time)
-                        const kelas = loan.student?.class
-                            ? `${loan.student.class.class} ${loan.student.class.major}`
-                            : '-'
+                        const kelas = loan.student?.class?.full_name ?? '-'
                         const barangNames = [...new Map(
                             (loan.details ?? [])
                                 .filter(d => d.unit?.item)

@@ -23,11 +23,6 @@ interface SimpleItem {
     value: string
 }
 
-function getAngkatan(className: string): number {
-    const match = className.match(/^(\d+)/)
-    return match ? parseInt(match[1], 10) : 0
-}
-
 export function Form() {
     const navigate = useNavigate()
 
@@ -56,11 +51,8 @@ export function Form() {
         if (!selectedMajor) return []
         return classesData
             .filter(c => c.major === selectedMajor.value)
-            .sort((a, b) => {
-                const diff = getAngkatan(a.class) - getAngkatan(b.class)
-                return diff !== 0 ? diff : a.class.localeCompare(b.class)
-            })
-            .map(c => ({ label: c.class, value: String(c.id) }))
+            .sort((a, b) => a.grade !== b.grade ? a.grade - b.grade : a.rombel - b.rombel)
+            .map(c => ({ label: c.full_name, value: String(c.id) }))
     }, [classesData, selectedMajor])
 
     const students: StudentItem[] = useMemo(() =>

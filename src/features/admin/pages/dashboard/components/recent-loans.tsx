@@ -35,9 +35,7 @@ export const RecentLoans = () => {
                 </TableHeader>
                 <TableBody>
                     {loans.map((loan) => {
-                        const kelas = loan.student?.class
-                            ? `${loan.student.class.class} ${loan.student.class.major}`
-                            : '-'
+                        const kelas = loan.student?.class?.full_name ?? '-'
                         const barang = loan.details?.map(d => d.unit?.item?.name).filter(Boolean).join(', ') || '-'
                         return (
                             <TableRow key={loan.id}>

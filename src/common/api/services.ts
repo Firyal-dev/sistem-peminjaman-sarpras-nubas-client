@@ -4,8 +4,11 @@ import { api } from "./axios";
 
 export interface ApiClass {
   id: number;
-  class: string;
-  major: string;
+  grade: number;   // 10 | 11 | 12 | 13
+  major: string;   // e.g. "PPLG", "Farmasi", "Analis Kimia"
+  rombel: number;  // 1, 2, 3, …
+  full_name: string; // accessor from backend: "10 PPLG 1"
+  students_count?: number; // withCount('students') from index
   created_at: string;
   updated_at: string;
 }
@@ -94,9 +97,10 @@ export const authService = {
 
 export const classesService = {
   getAll: () => api.get<ApiClass[]>("/classes").then((r) => r.data),
-  create: (data: { class: string; major: string }) =>
+  getOne: (id: number) => api.get<ApiClass>(`/classes/${id}`).then((r) => r.data),
+  create: (data: { grade: number; major: string; rombel: number }) =>
     api.post<ApiClass>("/classes", data).then((r) => r.data),
-  update: (id: number, data: Partial<{ class: string; major: string }>) =>
+  update: (id: number, data: Partial<{ grade: number; major: string; rombel: number }>) =>
     api.put<ApiClass>(`/classes/${id}`, data).then((r) => r.data),
   delete: (id: number) => api.delete(`/classes/${id}`),
 };

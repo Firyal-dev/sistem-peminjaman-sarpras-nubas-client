@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, PackageCheck, PackageOpen, ClipboardList } from "lucide-react"
+import { LayoutDashboard, Package, PackageCheck, PackageOpen, ClipboardList, GraduationCap } from "lucide-react"
 import { NavLink, useLocation } from "react-router"
 
 import {
@@ -39,6 +39,11 @@ const navItems = [
         url: "/admin/rekap",
         icon: ClipboardList,
     },
+    {
+        title: "Manajemen Kelas",
+        url: "/admin/kelas",
+        icon: GraduationCap,
+    },
 ]
 
 export const AppSidebar = () => {
@@ -48,6 +53,9 @@ export const AppSidebar = () => {
     const isActive = (url: string) => {
         if (url === '/admin/barang') {
             return location.pathname === url || location.pathname.startsWith('/admin/barang/')
+        }
+        if (url === '/admin/kelas') {
+            return location.pathname === url || location.pathname.startsWith('/admin/kelas/')
         }
         return location.pathname === url
     }

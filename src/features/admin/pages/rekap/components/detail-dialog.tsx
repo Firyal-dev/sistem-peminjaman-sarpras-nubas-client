@@ -22,9 +22,7 @@ export const DetailDialog = ({ tx, open, onOpenChange }: DetailDialogProps) => {
     const terlambatAktif = !isDone && isTerlambatAktif(tx.due_time)
     const durasi = hitungDurasi(tx.borrow_time, tx.return_time)
 
-    const kelas = tx.student?.class
-        ? `${tx.student.class.class} ${tx.student.class.major}`
-        : '-'
+    const kelas = tx.student?.class?.full_name ?? '-'
 
     // Unique item names
     const barangList = [

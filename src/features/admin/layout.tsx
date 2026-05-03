@@ -24,6 +24,8 @@ const routeLabels: Record<string, string> = {
     dipinjam: "Barang Dipinjam",
     dikembalikan: "Barang Dikembalikan",
     rekap: "Rekap Transaksi",
+    kelas: "Manajemen Kelas",
+    siswa: "Daftar Siswa",
 }
 
 export const Layout = () => {
