@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
 import { Eye, EyeOff, Lock, Mail } from "lucide-react"
-import { toast } from "sonner"
 
 import { Button } from "@/common/components/ui/button"
 import { Input } from "@/common/components/ui/input"
@@ -28,12 +27,10 @@ export const LoginForm = () => {
         try {
             const { token, user } = await authService.login(email, password)
             authStore.save(token, user)
-            toast.success(`Selamat datang, ${user.name}!`)
             navigate('/admin/dashboard', { replace: true })
         } catch (e: unknown) {
             const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
             setError(msg ?? 'Login gagal. Periksa email dan password.')
-            toast.error(msg ?? 'Login gagal.')
         } finally {
             setLoading(false)
         }

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, PackageCheck, PackageOpen } from "lucide-react"
+import { LayoutDashboard, Package, PackageCheck, PackageOpen, ClipboardList } from "lucide-react"
 import { NavLink, useLocation } from "react-router"
 
 import {
@@ -33,6 +33,11 @@ const navItems = [
         title: "Barang Dikembalikan",
         url: "/admin/dikembalikan",
         icon: PackageCheck,
+    },
+    {
+        title: "Rekap Transaksi",
+        url: "/admin/rekap",
+        icon: ClipboardList,
     },
 ]
 

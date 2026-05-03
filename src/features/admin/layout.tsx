@@ -1,6 +1,6 @@
+import { useState } from "react"
 import { Outlet, useLocation, useNavigate } from "react-router"
 import { LogOut } from "lucide-react"
-import { toast } from "sonner"
 
 import {
     Breadcrumb,
@@ -15,6 +15,7 @@ import { Button } from "@/common/components/ui/button"
 import { AppSidebar } from "./components/app-sidebar"
 import { authStore } from "@/common/auth/authStore"
 import { authService } from "@/common/api/services"
+import { ConfirmDialog } from "@/common/components/confirm-dialog"
 
 const routeLabels: Record<string, string> = {
     dashboard: "Dashboard",
@@ -22,6 +23,7 @@ const routeLabels: Record<string, string> = {
     units: "Kelola Unit",
     dipinjam: "Barang Dipinjam",
     dikembalikan: "Barang Dikembalikan",
+    rekap: "Rekap Transaksi",
 }
 
 export const Layout = () => {
@@ -31,10 +33,11 @@ export const Layout = () => {
     const segments = location.pathname.split("/").filter(Boolean)
     const crumbs = segments.slice(1)
 
+    const [logoutOpen, setLogoutOpen] = useState(false)
+
     const handleLogout = async () => {
         try { await authService.logout() } catch { /* ignore */ }
         authStore.clear()
-        toast.success('Berhasil logout')
         navigate('/admin/login', { replace: true })
     }
 
@@ -72,7 +75,7 @@ export const Layout = () => {
                                 {user.name}
                             </span>
                         )}
-                        <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+                        <Button variant="ghost" size="icon" onClick={() => setLogoutOpen(true)} title="Logout">
                             <LogOut className="size-4" />
                         </Button>
                     </div>
@@ -81,6 +84,16 @@ export const Layout = () => {
                     <Outlet />
                 </main>
             </SidebarInset>
+
+            <ConfirmDialog
+                open={logoutOpen}
+                onOpenChange={setLogoutOpen}
+                title="Keluar dari Aplikasi"
+                description="Anda akan keluar dari sesi admin. Lanjutkan?"
+                confirmLabel="Ya, Keluar"
+                cancelLabel="Batal"
+                onConfirm={handleLogout}
+            />
         </SidebarProvider>
     )
 }

@@ -1,3 +1,4 @@
+import { Check } from "lucide-react"
 import { Label } from "@/common/components/ui/label"
 import {
     Combobox,
@@ -19,12 +20,31 @@ interface StudentComboBoxProps {
     disabled?: boolean
     placeholder?: string
     onValueChange: (val: StudentItem | null) => void
+    stepNumber?: number
+    done?: boolean
 }
 
-export const StudentComboBox = ({ items, disabled, placeholder, onValueChange }: StudentComboBoxProps) => {
+export const StudentComboBox = ({
+    items,
+    disabled,
+    placeholder,
+    onValueChange,
+    stepNumber,
+    done,
+}: StudentComboBoxProps) => {
     return (
         <div className="space-y-2">
-            <Label>Nama Siswa</Label>
+            <Label className="flex items-center gap-1.5">
+                {stepNumber !== undefined && (
+                    <span className={[
+                        "flex size-5 items-center justify-center rounded-full text-[10px] font-bold",
+                        done ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    ].join(" ")}>
+                        {done ? <Check className="size-3" /> : stepNumber}
+                    </span>
+                )}
+                Nama Siswa
+            </Label>
             <Combobox
                 items={items}
                 itemToStringValue={(item) => item.label}

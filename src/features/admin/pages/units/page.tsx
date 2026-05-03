@@ -1,7 +1,7 @@
+import { useState } from "react"
 import { useParams, useNavigate } from "react-router"
 import { useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react"
-import { toast } from "sonner"
 
 import { Button } from "@/common/components/ui/button"
 import { Header } from "../../components/header"
@@ -12,6 +12,7 @@ import { useItem } from "@/common/hooks/useItems"
 import { useUnits } from "@/common/hooks/useUnits"
 import { unitsService } from "@/common/api/services"
 import { queryKeys } from "@/common/query/keys"
+import { ResultDialog } from "@/common/components/result-dialog"
 
 export const UnitPage = () => {
     const { itemId } = useParams<{ itemId: string }>()
@@ -22,19 +23,21 @@ export const UnitPage = () => {
     const { data: item, isLoading: loadingItem } = useItem(id)
     const { data: units = [], isLoading: loadingUnits, error } = useUnits(id)
 
+    const [deleteResult, setDeleteResult] = useState<{ type: "success" | "error"; msg: string } | null>(null)
+
     const invalidate = () => {
         qc.invalidateQueries({ queryKey: queryKeys.units.byItem(id) })
-        qc.invalidateQueries({ queryKey: queryKeys.items.all })  // update unit counts
+        qc.invalidateQueries({ queryKey: queryKeys.items.all })
     }
 
     const handleDelete = async (unitId: number) => {
         try {
             await unitsService.delete(unitId)
             invalidate()
-            toast.success('Unit berhasil dihapus')
+            setDeleteResult({ type: "success", msg: "Unit berhasil dihapus." })
         } catch (e: unknown) {
             const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
-            toast.error(msg ?? 'Gagal menghapus unit')
+            setDeleteResult({ type: "error", msg: msg ?? "Gagal menghapus unit." })
         }
     }
 
@@ -43,6 +46,7 @@ export const UnitPage = () => {
     const borrowedCount = units.filter(u => u.status === 'borrowed').length
 
     return (
+        <>
         <div className="space-y-6">
             <div className="flex items-start gap-3">
                 <Button variant="ghost" size="icon" onClick={() => navigate('/admin/barang')}>
@@ -133,5 +137,16 @@ export const UnitPage = () => {
                 </div>
             )}
         </div>
+
+        {deleteResult && (
+            <ResultDialog
+                open={!!deleteResult}
+                onOpenChange={(open) => { if (!open) setDeleteResult(null) }}
+                type={deleteResult.type}
+                title={deleteResult.type === "success" ? "Unit Dihapus" : "Gagal Menghapus"}
+                description={deleteResult.msg}
+            />
+        )}
+    </>
     )
 }

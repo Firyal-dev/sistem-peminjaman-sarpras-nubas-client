@@ -1,44 +1,70 @@
 import { Link } from "react-router"
-import { ArrowRight, RotateCcw } from "lucide-react"
-
-import { Button } from "@/common/components/ui/button"
+import { ArrowRight, RotateCcw, ScanLine } from "lucide-react"
 
 export const LandingPage = () => {
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4">
-            <div className="w-full max-w-sm space-y-8">
+        <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-8">
+            <div className="w-full max-w-lg space-y-8">
 
-                {/* Logo + Title */}
-                <div className="space-y-4 text-center">
+                {/* Logo + Title — horizontal */}
+                <div className="flex items-center gap-4">
                     <img
                         src="/aknb.png"
                         alt="Logo AKNB"
-                        className="mx-auto size-24 object-contain"
+                        className="size-16 shrink-0 object-contain"
                     />
-                    <div className="space-y-1">
-                        <h1 className="text-2xl font-semibold tracking-tight">
-                            Peminjaman Barang Sarpras
-                        </h1>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">Peminjaman Sarpras</h1>
                         <p className="text-sm text-muted-foreground">
-                            Pilih salah satu menu di bawah untuk melanjutkan
+                            Sistem peminjaman barang sarana dan prasarana
                         </p>
                     </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-col gap-3">
-                    <Button asChild size="lg" className="w-full">
-                        <Link to="/form">
-                            <ArrowRight className="size-4" />
-                            Pinjam Barang
+                <div className="h-px bg-border" />
+
+                {/* Menu cards — side by side */}
+                <div>
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Pilih menu
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                        <Link
+                            to="/form"
+                            className="group flex flex-col gap-4 rounded-2xl border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.98]"
+                        >
+                            <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
+                                <ScanLine className="size-6 text-primary" />
+                            </div>
+                            <div>
+                                <p className="font-semibold">Pinjam Barang</p>
+                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                    Isi form &amp; scan QR barang
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs font-medium text-primary">
+                                Mulai <ArrowRight className="size-3.5" />
+                            </div>
                         </Link>
-                    </Button>
-                    <Button asChild size="lg" variant="outline" className="w-full">
-                        <Link to="/return">
-                            <RotateCcw className="size-4" />
-                            Kembalikan Barang
+
+                        <Link
+                            to="/return"
+                            className="group flex flex-col gap-4 rounded-2xl border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.98]"
+                        >
+                            <div className="flex size-12 items-center justify-center rounded-xl bg-muted transition-colors group-hover:bg-muted/80">
+                                <RotateCcw className="size-6 text-muted-foreground" />
+                            </div>
+                            <div>
+                                <p className="font-semibold">Kembalikan Barang</p>
+                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                    Pilih transaksi &amp; scan QR
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                                Mulai <ArrowRight className="size-3.5" />
+                            </div>
                         </Link>
-                    </Button>
+                    </div>
                 </div>
 
             </div>

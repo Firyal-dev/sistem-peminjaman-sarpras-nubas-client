@@ -2,13 +2,13 @@ import { type ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, Layers, ImageIcon, CheckCircle2, XCircle } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router"
-import { toast } from "sonner"
 
 import { Button } from "@/common/components/ui/button"
 import { Checkbox } from "@/common/components/ui/checkbox"
 import { DataTableDeleteAction, DataTableEditAction } from "@/features/admin/components/data-table-button-action"
 import { FormDialog } from "./form-dialog"
 import { ImagePhotoView } from "@/features/admin/components/photo-view"
+import { ResultDialog } from "@/common/components/result-dialog"
 
 export interface Barang {
     id: number
@@ -134,24 +134,43 @@ export function buildColumns(onRefresh: () => void): ColumnDef<Barang>[] {
         {
             id: "actions",
             header: "Aksi",
-            cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                    <EditCell barang={row.original} onUpdated={onRefresh} />
-                    <DataTableDeleteAction
-                        id={row.original.id}
-                        onDelete={async (id) => {
-                            try {
-                                await import('@/common/api/services').then(m => m.itemsService.delete(id))
-                                onRefresh()
-                                toast.success('Barang berhasil dihapus')
-                            } catch (e: unknown) {
-                                const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
-                                toast.error(msg ?? 'Gagal menghapus barang')
-                            }
-                        }}
-                    />
-                </div>
-            ),
+            cell: ({ row }) => {
+                const DeleteCell = () => {
+                    const [result, setResult] = useState<{ type: "success" | "error"; msg: string } | null>(null)
+                    return (
+                        <>
+                            <DataTableDeleteAction
+                                id={row.original.id}
+                                onDelete={async (id) => {
+                                    try {
+                                        await import('@/common/api/services').then(m => m.itemsService.delete(id))
+                                        onRefresh()
+                                        setResult({ type: "success", msg: "Barang berhasil dihapus." })
+                                    } catch (e: unknown) {
+                                        const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
+                                        setResult({ type: "error", msg: msg ?? "Gagal menghapus barang." })
+                                    }
+                                }}
+                            />
+                            {result && (
+                                <ResultDialog
+                                    open={!!result}
+                                    onOpenChange={(open) => { if (!open) setResult(null) }}
+                                    type={result.type}
+                                    title={result.type === "success" ? "Barang Dihapus" : "Gagal Menghapus"}
+                                    description={result.msg}
+                                />
+                            )}
+                        </>
+                    )
+                }
+                return (
+                    <div className="flex items-center gap-2">
+                        <EditCell barang={row.original} onUpdated={onRefresh} />
+                        <DeleteCell />
+                    </div>
+                )
+            },
         },
     ]
 }

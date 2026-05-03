@@ -163,26 +163,58 @@ export const scanService = {
 
 export const transactionsService = {
   getAll: (params?: {
-    student_id?: number;
-    status?: "active" | "done";
-    page?: number;
+    student_id?: number
+    status?: "active" | "done"
+    page?: number
   }) =>
     api
       .get<PaginatedResponse<ApiTransaction>>("/transactions", { params })
       .then((r) => r.data),
+
   getOne: (id: number) =>
     api.get<ApiTransaction>(`/transactions/${id}`).then((r) => r.data),
+
   create: (data: {
-    student_id: number;
-    units: number[];
-    due_time: string;
-    notes?: string;
-  }) => api.post<ApiTransaction>("/transactions", data).then((r) => r.data),
+    student_id: number
+    units: number[]
+    due_time: string
+    notes?: string
+  }) =>
+    api.post<ApiTransaction>("/transactions", data).then((r) => r.data),
+
   processReturn: (transactionId: number, unitIds: number[]) =>
     api
       .post<ApiTransaction>(`/transactions/${transactionId}/return`, {
         units: unitIds,
       })
       .then((r) => r.data),
+
   exportUrl: () => `${api.defaults.baseURL}/transactions/export`,
-};
+
+  exportExcel: async (filename = "laporan-transaksi.xlsx") => {
+    const res = await api.get("/transactions/export", { responseType: "blob" })
+    const url = URL.createObjectURL(new Blob([res.data]))
+    const a = document.createElement("a")
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+  },
+
+  exportRekap: async (filename = "rekap-transaksi.xlsx") => {
+    const res = await api.get("/transactions/rekap", { responseType: "blob" })
+    const url = URL.createObjectURL(new Blob([res.data]))
+    const a = document.createElement("a")
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+  },
+
+  getAllFull: (params?: { status?: "active" | "done" }) =>
+    api
+      .get<PaginatedResponse<ApiTransaction>>("/transactions", {
+        params: { ...params, per_page: 9999 },
+      })
+      .then((r) => r.data),
+}

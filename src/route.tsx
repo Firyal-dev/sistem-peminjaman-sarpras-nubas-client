@@ -11,6 +11,7 @@ import { DaftarBarang } from './features/admin/pages/barang/page'
 import { DaftarPeminjamanBarang } from './features/admin/pages/peminjaman/page'
 import { DaftarPengembalianBarang } from './features/admin/pages/pengembalian/page'
 import { UnitPage } from './features/admin/pages/units/page'
+import { RekapPage } from './features/admin/pages/rekap/page'
 
 import { Form } from './features/user/pages/form/page'
 import { ScanPage } from './features/user/pages/scan/page'
@@ -59,6 +60,10 @@ const route = createBrowserRouter([
                     {
                         path: 'dikembalikan',
                         Component: DaftarPengembalianBarang,
+                    },
+                    {
+                        path: 'rekap',
+                        Component: RekapPage,
                     },
                 ],
             },

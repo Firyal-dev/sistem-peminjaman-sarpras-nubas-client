@@ -1,4 +1,4 @@
-import { X } from "lucide-react"
+import { X, CheckCircle2 } from "lucide-react"
 import { Button } from "@/common/components/ui/button"
 
 interface ScannedListProps {
@@ -26,47 +26,60 @@ export const ScannedList = ({
 
     return (
         <div className="space-y-3">
-            <p className="text-sm font-medium">
-                {mode === "return" ? "Barang dikembalikan" : "Barang dipilih"}
-                <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                    {items.length}
-                </span>
-            </p>
-
+            {/* Item list */}
             <div className="space-y-2">
                 {items.map((code, index) => (
                     <div
                         key={code}
-                        className="flex items-center justify-between rounded-lg border bg-card px-3 py-2"
+                        className="flex items-center gap-3 rounded-xl border bg-card px-3 py-2.5"
                     >
-                        <div className="flex items-center gap-3">
-                            <span className="flex size-6 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-                                {index + 1}
-                            </span>
-                            {/* Tampilkan nama item saja — sembunyikan QR code dari user */}
-                            <span className="text-sm font-medium">
-                                {itemLabels?.[code] && itemLabels[code] !== code
-                                    ? itemLabels[code]
-                                    : code
-                                }
-                            </span>
+                        <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                            <span className="text-[10px] font-bold text-primary">{index + 1}</span>
                         </div>
+                        <span className="flex-1 min-w-0 text-sm font-medium truncate">
+                            {itemLabels?.[code] && itemLabels[code] !== code
+                                ? itemLabels[code]
+                                : code
+                            }
+                        </span>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="size-7 text-muted-foreground hover:text-destructive"
+                            className="size-7 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             onClick={() => onRemove(code)}
                             disabled={submitting}
+                            title="Hapus"
                         >
-                            <X className="size-4" />
+                            <X className="size-3.5" />
                         </Button>
                     </div>
                 ))}
             </div>
 
-            <Button className="w-full" onClick={onSubmit} disabled={submitting}>
-                {submitting ? "Memproses..." : `${label} ${items.length} Barang`}
-            </Button>
+            {/* Count + Submit */}
+            <div className="rounded-xl border bg-muted/30 px-3 py-2.5 flex items-center justify-between gap-3">
+                <span className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">{items.length}</span> barang dipilih
+                </span>
+                <Button
+                    size="sm"
+                    onClick={onSubmit}
+                    disabled={submitting}
+                    className="gap-1.5 shrink-0"
+                >
+                    {submitting ? (
+                        <>
+                            <span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            Memproses...
+                        </>
+                    ) : (
+                        <>
+                            <CheckCircle2 className="size-4" />
+                            {label}
+                        </>
+                    )}
+                </Button>
+            </div>
         </div>
     )
 }
