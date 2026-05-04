@@ -33,13 +33,14 @@ Aplikasi web untuk sistem peminjaman sarana dan prasarana (sarpras) sekolah. Ter
 
 ```bash
 # 1. Masuk ke folder
-cd sistem-peminjaman-sarpras-nubas-client
+cd your_folder_name
 
 # 2. Install dependencies
 npm install
 
 # 3. Salin file environment
 cp .env.example .env
+
 # atau buat manual:
 echo "VITE_API_URL=http://localhost:8000/api" > .env
 
