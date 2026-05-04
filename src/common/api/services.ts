@@ -186,10 +186,11 @@ export const transactionsService = {
   }) =>
     api.post<ApiTransaction>("/transactions", data).then((r) => r.data),
 
-  processReturn: (transactionId: number, unitIds: number[]) =>
+  processReturn: (transactionId: number, unitIds: number[], notes?: string) =>
     api
       .post<ApiTransaction>(`/transactions/${transactionId}/return`, {
         units: unitIds,
+        ...(notes ? { notes } : {}),
       })
       .then((r) => r.data),
 
